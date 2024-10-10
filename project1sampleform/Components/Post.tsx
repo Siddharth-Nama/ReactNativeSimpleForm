@@ -38,20 +38,17 @@ export default function Post({navigation}:any ,{route}:any) {
         } else if (response.errorMessage) {
           console.log('Image picker error:', response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
-          const imageUri = response.assets[0].uri;
-  
-          // Compress the selected image before uploading
-          ImageResizer.createResizedImage(imageUri, 800, 600, 'JPEG', 70) // Resize to 800x600 with 70% quality
-            .then((resizedImage) => {
-              // Save compressed image URI
-              setimage(resizedImage.uri); 
-  
-              // Optional: If you need the base64 version for uploading
-              setimage(response.assets[0].base64 || null);
-            })
-            .catch((err) => {
-              console.log('Error during image compression:', err);
-            });
+          const imageUri = response.assets[0]?.uri;
+if (imageUri) {
+  ImageResizer.createResizedImage(imageUri, 800, 600, 'JPEG', 70)
+    .then((resizedImage) => {
+      setimage(resizedImage.uri);
+      setimage(response.assets[0]?.base64 || null); // Make sure base64 is handled safely
+    })
+    .catch((err) => {
+      console.log('Error during image compression:', err);
+    });
+}
         } else {
           console.log('No image selected');
         }

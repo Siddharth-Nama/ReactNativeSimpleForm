@@ -1,11 +1,11 @@
 from django.db import models
 class form(models.Model):
     firstname = models.CharField(max_length=30)
-    middlename = models.CharField(max_length=30)
+    middlename = models.CharField(max_length=30,null=True,blank=True)
     lastname = models.CharField(max_length=30)
     phoneno = models.IntegerField(max_length=10,default=8000694996)
     age = models.IntegerField(max_length=3 , default=30)
-    image = models.ImageField(upload_to='media' , null=True)
+    image = models.ImageField(upload_to='profile/' , null=True)
     rating = models.IntegerField(choices=[
         (1, '1 - Poor'),
         (2, '2 - Fair'),
