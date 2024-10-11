@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { url } from '../config';
 import ImageResizer from 'react-native-image-resizer';
+import SplashScreen from './SplashScreen';
 
 export default function Post({navigation}:any ,{route}:any) {
   const [firstname, setFirstname] = useState('');
@@ -24,6 +25,7 @@ export default function Post({navigation}:any ,{route}:any) {
     rating: '',
     image: '',
   });
+  const [loading, setLoading] = useState(false);
 
   interface FormDataType {
     firstname: string;
@@ -155,6 +157,7 @@ export default function Post({navigation}:any ,{route}:any) {
 
   const handleSubmit = () => {
     if (validate()) {
+      setLoading(true);
       const formData = new FormData();
       formData.append('phoneno', phoneno);
       formData.append('firstname', firstname);
@@ -196,7 +199,11 @@ export default function Post({navigation}:any ,{route}:any) {
         } else {
           console.log('Error Message:', error.message);
         }
+      })
+      .finally(() => {
+        setLoading(false); // Hide splash screen after submission
       });
+
     } else {
       Alert.alert('Error', 'Please correct the errors before submitting.');
       console.log('Error:');
@@ -205,6 +212,10 @@ export default function Post({navigation}:any ,{route}:any) {
   
 
   return (
+    <>
+    {loading ? (
+      <SplashScreen />  // Show splash screen when loading is true
+    ) : (
     <ScrollView style={styles.container}>
       <View style={styles.formcontainer}>
         <View style={styles.block}>
@@ -289,6 +300,8 @@ export default function Post({navigation}:any ,{route}:any) {
         <View style={styles.submit}><Button  color='#85DFEF' title="Submit" onPress={handleSubmit} /></View>
       </View>
     </ScrollView>
+    )}
+    </>
   );
 }
 

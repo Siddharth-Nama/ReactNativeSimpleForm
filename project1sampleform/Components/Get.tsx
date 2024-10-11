@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View, Pressable, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { url } from '../config';
 
 function Get({ navigation }: any): React.JSX.Element {
   const [form, setForm] = useState([]);
+  const [loading, setLoading] = useState(true); // New loading state
 
   const getAllForm = async () => {
     try {
+      setLoading(true); // Start loading
       const response = await axios.get(`${url}/api/form/`);
       const newData = response.data;
-      // console.log(newData, ':+++');
       setForm(newData);
+      setLoading(false); // Stop loading after data is fetched
     } catch (error) {
       console.log(error, '??????');
+      setLoading(false); // Stop loading in case of error
     }
   };
 
@@ -49,14 +52,20 @@ function Get({ navigation }: any): React.JSX.Element {
           onPress={navigateToSubmit}>
           <Text style={{ color: 'black' }}>Add New</Text>
         </Pressable>
-        {form.length ? (
+
+        {/* Show loader or content based on the loading state */}
+        {loading ? (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color="green" />
+          </View>
+        ) : form.length ? (
           form.reverse().map((item: any, index) => (
             <View key={index} style={styles.block}>
               <View style={styles.main}>
                 <Text style={styles.label}>
-                  Name : {item.firstname} {item.middlename} {item.lastname}
+                  Name: {item.firstname} {item.middlename} {item.lastname}
                 </Text>
-                <Text style={styles.label}>Phone No : {item.phoneno}</Text>
+                <Text style={styles.label}>Phone No: {item.phoneno}</Text>
               </View>
               <View style={styles.seeall}>
                 <Pressable
@@ -71,8 +80,9 @@ function Get({ navigation }: any): React.JSX.Element {
         ) : (
           <View style={styles.block}>
             <Text style={styles.label}>No data available</Text>
-            </View>
+          </View>
         )}
+
         <Pressable
           style={styles.button}
           onPress={navigateToSubmit}>
@@ -104,15 +114,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
     color: 'black',
-    
   },
   label1: {
     fontSize: 15,
     fontWeight: 'bold',
     marginBottom: 10,
     color: 'black',
-    backgroundColor:'#b5ebf5',
-    padding:10,
+    backgroundColor: '#b5ebf5',
+    padding: 10,
   },
   header: {
     justifyContent: 'center',
@@ -139,6 +148,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     color: 'black',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
   },
 });
 
