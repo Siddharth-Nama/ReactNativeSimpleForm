@@ -23,19 +23,13 @@ class formpost(ListAPIView):
         age = request.data.get('age')
         feedback = request.data.get('feedback')
         rating = request.data.get('rating')
-        image_base64 = request.data.get('image')  # Assuming image is a base64 string
+        image = request.FILES.get('image', None)  # Use request.FILES to get uploaded files
         
-        # Decode base64 image
-        if image_base64:
-            try:
-                if ';base64,' in image_base64:
-                    format, imgstr = image_base64.split(';base64,') 
-                    ext = format.split('/')[-1]
-                    data = ContentFile(base64.b64decode(imgstr), name='image.' + ext)
-                else:
-                    return Response({"error": "Invalid image format"}, status=status.HTTP_400_BAD_REQUEST)
-            except (ValueError, IndexError, base64.binascii.Error):
-                return Response({"error": "Invalid image data"}, status=status.HTTP_400_BAD_REQUEST)
+        if image:
+            # Ensure the image file is an instance of UploadedFile
+            if not isinstance(image):
+                return Response({"error": "Invalid image format"}, status=status.HTTP_400_BAD_REQUEST)
+            
         user = form.objects.create(
             firstname=firstname,
             phoneno=phoneno,
@@ -44,7 +38,7 @@ class formpost(ListAPIView):
             age=age,
             feedback=feedback,
             rating=rating,
-            image=data
+            image=image
         )
         user.save()
         return Response(status=status.HTTP_200_OK)

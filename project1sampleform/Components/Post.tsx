@@ -25,36 +25,66 @@ export default function Post({navigation}:any ,{route}:any) {
     image: '',
   });
 
+  interface FormDataType {
+    firstname: string;
+    middlename?: string;
+    lastname: string;
+    phoneno: string;
+    age: string;
+    feedback: string;
+    rating: string;
+    image: string | null | undefined;
+  }
+  const [formData, setFormData] = useState<FormDataType>({
+    firstname: '',
+    middlename: '',
+    lastname: '',
+    phoneno: '',
+    age: '',
+    feedback: '',
+    rating: '1',
+    image: null,
+  });
+    
   const handleSelectImage = () => {
     launchImageLibrary(
-      {
-        includeBase64: true,
-        mediaType: 'photo',
-      },
+      { includeBase64: true, mediaType: 'photo' },
       (response) => {
-        // Check if the user canceled the action or if there's an error
         if (response.didCancel) {
           console.log('User cancelled image picker');
         } else if (response.errorMessage) {
           console.log('Image picker error:', response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
-          const imageUri = response.assets[0]?.uri;
-if (imageUri) {
-  ImageResizer.createResizedImage(imageUri, 800, 600, 'JPEG', 70)
-    .then((resizedImage) => {
-      setimage(resizedImage.uri);
-      setimage(response.assets[0]?.base64 || null); // Make sure base64 is handled safely
-    })
-    .catch((err) => {
-      console.log('Error during image compression:', err);
-    });
-}
+          const selectedAsset = response.assets[0];
+          const imageUri = selectedAsset.uri;
+  
+          if (imageUri) {
+            // Resize the image if needed
+            ImageResizer.createResizedImage(imageUri, 800, 600, 'JPEG', 70)
+              .then((resizedImage) => {
+                setimage(resizedImage.uri); // Set the URI of the resized image for display
+                
+                // If you still need to handle the base64 image, you can get it from the original response
+                if (selectedAsset.base64) {
+                  setFormData((prev: FormDataType) => ({
+                    ...prev,
+                    image: selectedAsset.base64, // Use the original image's base64
+                  }));
+                } else {
+                  console.log('Base64 not available in selected asset');
+                }
+              })
+              .catch((err) => {
+                console.log('Error during image compression:', err);
+              });
+          }
         } else {
           console.log('No image selected');
         }
       }
     );
   };
+  
   
   const validate = () => {
     let valid = true;
@@ -121,44 +151,59 @@ if (imageUri) {
     setErrors(errors);
     return valid;
   };
-  const imageUri = `data:image/jpg;base64,${image}` || `data:image/png;base64,${image}` || `data:image/jpeg;base64,${image}`;
+
+
   const handleSubmit = () => {
     if (validate()) {
-      const data = {
-        phoneno,
-        firstname,
-        middlename,
-        lastname,
-        age,
-        feedback,
-        rating,
-        image: imageUri, 
-      };
-      axios.post(url + '/api/submit/', data, {
+      const formData = new FormData();
+      formData.append('phoneno', phoneno);
+      formData.append('firstname', firstname);
+      formData.append('middlename', middlename);
+      formData.append('lastname', lastname);
+      formData.append('age', age);
+      formData.append('feedback', feedback);
+      formData.append('rating', rating);
+  
+      if (image) {
+        const formDataImage = {
+          uri: image, // Ensure this is a valid URI
+          type: 'image/jpeg', // Change this according to the actual image type (e.g., 'image/png' for PNG files)
+          name: 'image.jpg', // Use a valid filename with extension
+        };
+        formData.append('image', formDataImage);
+      }
+      
+      console.log("hi--------------------->");
+  
+      axios.post(url + '/api/submit/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-       
-        .then(response => {
-          console.log('Success:', response.data);
-          const refreshData = route?.refreshData; // Get refreshData function from navigation params
-          if (refreshData) {
-            refreshData(); // Call refreshData function to refresh the data in Get screen
-          }
-          navigation.navigate("Home"); // Navigate to Home screen on success
-          console.log("home")
-        })
-        .catch(error => {
-          Alert.alert('Error', 'An error occurred while submitting the form.');
-          console.log('Error:', error);
-        });
+      .then(response => {
+        console.log('Success-------------------------->', response.data);
+        const refreshData = route?.refreshData;
+        if (refreshData) {
+          refreshData();
+        }
+        navigation.navigate("Home");
+        console.log("home");
+      })
+      .catch(error => {
+        if (error.response) {
+          console.log('Error Data:', error.response.data);
+          console.log('Error Status:', error.response.status);
+        } else if (error.request) {
+          console.log('Error Request:', error.request);
+        } else {
+          console.log('Error Message:', error.message);
+        }
+      });
     } else {
       Alert.alert('Error', 'Please correct the errors before submitting.');
       console.log('Error:');
-
     }
-
   };
   
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.formcontainer}>
@@ -228,7 +273,7 @@ if (imageUri) {
         <View style={styles.block}>
           <Text style={styles.label}>Profile Image:</Text>
           <Button color='#85DFEF' title="Select Image" onPress={handleSelectImage} />
-          {image && <Image source={{ uri: imageUri }} style={styles.image} />}   
+          {image && <Image source={{ uri: image }} style={styles.image} />}   
          {errors.image ? <Text style={styles.errorText}>{errors.image}</Text> : null}
         </View>
         <View style={styles.block}>

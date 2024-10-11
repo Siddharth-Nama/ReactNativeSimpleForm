@@ -10,7 +10,7 @@ function Get({ navigation }: any): React.JSX.Element {
     try {
       const response = await axios.get(`${url}/api/form/`);
       const newData = response.data;
-      console.log(newData, ':+++');
+      // console.log(newData, ':+++');
       setForm(newData);
     } catch (error) {
       console.log(error, '??????');
