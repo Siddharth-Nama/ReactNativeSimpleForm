@@ -2,6 +2,7 @@ from django.shortcuts import render
 import base64
 from .models import *
 from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import UploadedFile
 from .serializers import *
 from rest_framework.generics import ListAPIView
 from rest_framework import status
@@ -23,11 +24,12 @@ class formpost(ListAPIView):
         age = request.data.get('age')
         feedback = request.data.get('feedback')
         rating = request.data.get('rating')
-        image = request.FILES.get('image', None)  # Use request.FILES to get uploaded files
+        image = request.FILES.get('image')  # Use request.FILES to get uploaded files
         
         if image:
             # Ensure the image file is an instance of UploadedFile
-            if not isinstance(image):
+
+            if not isinstance(image, UploadedFile):
                 return Response({"error": "Invalid image format"}, status=status.HTTP_400_BAD_REQUEST)
             
         user = form.objects.create(

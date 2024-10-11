@@ -129,7 +129,7 @@ export default function Post({navigation}:any ,{route}:any) {
       errors.age = 'Age is required';
       valid = false;
     } else if (!agePattern.test(age)) {
-      errors.age = 'Age must be valid';
+      errors.age = 'Age must be valid between 1-120';
       valid = false;
     }
 
@@ -286,7 +286,7 @@ export default function Post({navigation}:any ,{route}:any) {
           />
           {errors.feedback ? <Text style={styles.errorText}>{errors.feedback}</Text> : null}
         </View>
-        <View style={styles.submit}><Button title="Submit" onPress={handleSubmit} /></View>
+        <View style={styles.submit}><Button  color='#85DFEF' title="Submit" onPress={handleSubmit} /></View>
       </View>
     </ScrollView>
   );
@@ -333,7 +333,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   submit:{
-    width:'50%',
     margin:15,
     borderColor:'blue',
     borderRadius:8,
