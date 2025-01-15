@@ -79,8 +79,8 @@ android {
         applicationId "com.project1sampleform"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.0.2"
         resValue "string", "app_name", "Siddharth App"
     }
     signingConfigs {
